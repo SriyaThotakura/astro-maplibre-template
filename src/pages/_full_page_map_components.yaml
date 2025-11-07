@@ -4,8 +4,9 @@
   visible: false
   data-type: 'geojson'
   layer-type: 'line'
-  url: 'https://data.cityofnewyork.us/resource/mzxg-pwib.geojson?$limit=10000'
+  url: 'http://localhost:4321/astro-maplibre-template'
   paint:
+    fill-color: "#0000ff"
     line-color: '#000000'
     line-width: 3
 
