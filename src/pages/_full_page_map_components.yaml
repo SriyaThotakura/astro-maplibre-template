@@ -6,8 +6,8 @@
   layer-type: 'line'
   url: 'http://localhost:4321/astro-maplibre-template'
   paint:
-    fill-color: "#00ffff"
-    line-color: '#000000'
+    fill-color: "#0000ff"
+    line-color: '#0000ff'
     line-width: 3
 
 - id: 'vector-tile'
