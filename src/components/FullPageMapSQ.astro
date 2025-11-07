@@ -4,13 +4,13 @@ import yaml from "js-yaml";
 import type { LayerGroup } from "@types";
 
 // Load and parse the YAML file
-let layerConfigs = [];
+let layerConfigs: any[] = [];
 try {
   const fileContents = fs.readFileSync(
     "src/pages/full_sq.yaml",
     "utf8"
   );
-  layerConfigs = yaml.load(fileContents);
+  layerConfigs = yaml.load(fileContents) as any[];
   console.log('Loaded layer configs:', layerConfigs.map((l: any) => l.id));
 } catch (error) {
   console.error('Error loading YAML file:', error);
