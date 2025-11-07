@@ -27,12 +27,10 @@
       - color: "#b57624"  # Cinnamon
         label: "Cinnamon"
       - color: "#807d7a"  # Gray
-        stroke-color: "#000000"
         label: "Gray"
       - color: "#ffffff"  # White
-        stroke-color: "#000000"
         label: "White"
-      - color: "#000000"  # Black
+      - color: "#999999"  # Black
         label: "Black"
 
 - id: 'trees'
