@@ -1,0 +1,236 @@
+---
+import fs from "fs";
+import yaml from "js-yaml";
+import type { LayerGroup } from "@types";
+
+// Load and parse the YAML file
+let layerConfigs = [];
+try {
+  const fileContents = fs.readFileSync(
+    "src/pages/full_sq.yaml",
+    "utf8"
+  );
+  layerConfigs = yaml.load(fileContents);
+  console.log('Loaded layer configs:', layerConfigs.map((l: any) => l.id));
+} catch (error) {
+  console.error('Error loading YAML file:', error);
+}
+
+// Convert the array of layers to a LayerGroup
+const layers: LayerGroup = {
+  layers: layerConfigs
+};
+
+export interface Props {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+  mapstyle: string;
+  container: string;
+  interactive?: boolean;
+  containerstyle?: string;
+  pitch?: number;
+  bearing?: number;
+}
+
+
+const {
+  latitude,
+  longitude,
+  zoom,
+  mapstyle,
+  container,
+  interactive,
+  containerstyle = "height: 70vh; width: 100%; border-radius: 8px; overflow: hidden;",
+  pitch,
+  bearing,
+} = Astro.props;
+---
+
+<div class="full-page-map-container">
+  <div
+    id={container}
+    class="maplibre-inline map-container"
+    style={{ width: "100%", height: "100%" }}
+  >
+    <nav id={`${container}-menu`} class="menu"></nav>
+    <div class="map-overlay" id={`${container}-legend`} style="display:none"></div>
+    <maplibre-fullpage-map
+      data-latitude={latitude}
+      data-longitude={longitude}
+      data-zoom={zoom}
+      data-mapstyle={mapstyle}
+      data-container={container}
+      data-interactive={interactive}
+      data-containerstyle={containerstyle}
+      data-pitch={pitch}
+      data-bearing={bearing}
+      data-layers={JSON.stringify(layers.layers)}
+      data-debug="true"
+    >
+      <link
+        rel="stylesheet"
+        href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css"
+      />
+      <script>
+        import maplibregl from "maplibre-gl";
+        import { loadMapLayers } from "@lib/utils";
+        import type {
+          GeoJSONFeatureLayer,
+          ImageLayer,
+          RasterLayer,
+          VectorTileLayer,
+        } from "@types";
+
+        class MapLibreFullPageMap extends HTMLElement {
+          connectedCallback() {
+            const map = new maplibregl.Map({
+              container: this.dataset.container || "maplibre-map",
+              interactive: this.dataset.interactive
+                ? JSON.parse(this.dataset.interactive)
+                : false,
+              center: [
+                this.dataset.longitude ? parseFloat(this.dataset.longitude) : 0,
+                this.dataset.latitude ? parseFloat(this.dataset.latitude) : 0,
+              ],
+              zoom: this.dataset.zoom
+                ? parseFloat(this.dataset.zoom)
+                : 13,
+              style: this.dataset.mapstyle,
+              pitch: this.dataset.pitch ? parseFloat(this.dataset.pitch) : 0,
+              bearing: this.dataset.bearing ? parseFloat(this.dataset.bearing) : 0,
+            });
+
+            map.on("load", () => {
+              // Add layers
+              const layers = this.dataset.layers
+                ? JSON.parse(this.dataset.layers)
+                : [];
+              
+              if (layers.length > 0) {
+                loadMapLayers(map, layers);
+
+                // Add legend if layers have legend items
+                const legendContainer = document.getElementById(
+                  `${this.dataset.container}-legend`
+                );
+                
+                if (legendContainer) {
+                  const legendItems = layers.filter(
+                    (layer) => layer.legend && layer.legend.items && layer.legend.items.length > 0
+                  );
+
+                  if (legendItems.length > 0) {
+                    legendContainer.style.display = 'block';
+                    legendContainer.innerHTML = legendItems.map(layer => `
+                      <div class="legend-item">
+                        ${layer.legend.title ? `<h3>${layer.legend.title}</h3>` : ''}
+                        <div class="legend-items">
+                          ${layer.legend.items.map(item => `
+                            <div class="legend-row">
+                              <span 
+                                class="legend-color" 
+                                style="background-color: ${item.color}; ${item.strokeColor ? `border: 1px solid ${item.strokeColor}` : ''}"
+                              ></span>
+                              <span class="legend-label">${item.label}</span>
+                            </div>
+                          `).join('')}
+                        </div>
+                      </div>
+                    `).join('');
+                  }
+                }
+              }
+
+              // Add navigation control
+              map.addControl(new maplibregl.NavigationControl(), 'top-right');
+              
+              // Add scale control
+              map.addControl(new maplibregl.ScaleControl({}), 'bottom-left');
+            });
+
+            // Clean up on unmount
+            this.cleanup = () => {
+              if (map) {
+                map.remove();
+              }
+            };
+          }
+
+          disconnectedCallback() {
+            if (this.cleanup) {
+              this.cleanup();
+            }
+          }
+        }
+
+        customElements.define('maplibre-fullpage-map', MapLibreFullPageMap);
+      </script>
+    </maplibre-fullpage-map>
+  </div>
+</div>
+
+<style>
+  .full-page-map-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  
+  .map-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .map-overlay {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    z-index: 1;
+    max-width: 200px;
+  }
+  
+  .legend-item {
+    margin-bottom: 10px;
+  }
+  
+  .legend-item h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .legend-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  
+  .legend-color {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .legend-label {
+    font-size: 12px;
+  }
+  
+  .menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+</style>
