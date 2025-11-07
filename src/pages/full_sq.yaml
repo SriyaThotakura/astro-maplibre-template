@@ -1,0 +1,65 @@
+- id: 'test-raster'
+  label: 'OSM Tiles'
+  toggle: true  
+  visible: true
+  data-type: 'raster'
+  layer-type: 'raster'
+  url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+
+- id: 'squirrel'
+  label: 'Squirrel Census'
+  toggle: true
+  visible: false
+  data-type: 'geojson'
+  layer-type: 'circle'
+  url: './data/squirrel20241021.geojson'
+  paint:
+    circle-color: ['get', 'fur_color_val']
+  popup:
+    showOn: 'click'
+    content:
+      - p:
+          - str: "Fur color: "
+          - property: "primary_fur_color"
+  legend:
+    title: "Squirrel Fur Colors"
+    items:
+      - color: "#b57624"  # Cinnamon
+        label: "Cinnamon"
+      - color: "#807d7a"  # Gray
+        stroke-color: "#000000"
+        label: "Gray"
+      - color: "#ffffff"  # White
+        stroke-color: "#000000"
+        label: "White"
+      - color: "#000000"  # Black
+        label: "Black"
+
+- id: 'trees'
+  label: '2015 Street Tree Census'
+  toggle: true
+  visible: true
+  data-type: 'geojson'
+  layer-type: 'circle'
+  url: './data/2015_street_tree_census.geojson'
+  paint:
+    circle-color: [
+      'step',
+      ['get','tree_dbh'],
+      '#5ef787', ##color for all values < first value
+      3, '#4ecf71', ##value, color,
+      8, '#3a9c54',
+      12, '#286b3a',
+      15, '#173d21',
+      25, '#1b3622',
+      ]
+    circle-radius: [
+      'step',
+      ['get','tree_dbh'],
+      .5, ## size for all values < first value
+      3, 1, ##value, size,
+      8, 2,
+      12, 3,
+      15, 4,
+      25, 5,
+      ]

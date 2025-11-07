@@ -52,6 +52,7 @@ export function loadMapLayers(
   layers: LayerGroup,
   visibility: boolean = false
 ) {
+  console.log('Loading map layers:', layers);
   if (layers) {
     // Add toggle buttons if set to be so
     Object.values(layers).forEach(
@@ -86,9 +87,16 @@ export function loadMapLayers(
         layer: GeoJSONFeatureLayer | RasterLayer | ImageLayer | VectorTileLayer
       ) => {
         if (layer["data-type"] === "geojson") {
+          console.log('Loading GeoJSON layer:', layer.id, 'from', layer.url);
           fetch(layer.url)
-            .then((response) => response.json())
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`Failed to load ${layer.url}: ${response.status} ${response.statusText}`);
+              }
+              return response.json();
+            })
             .then((data) => {
+              console.log(`Loaded GeoJSON data for ${layer.id}:`, data);
               data.features.forEach(
                 (feature: {
                   geometry: {
