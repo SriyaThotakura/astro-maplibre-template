@@ -38,6 +38,9 @@ const { title, description, image = "/nano.png" } = Astro.props;
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
 
+<!-- MapLibre GL JS -->
+<script is:inline src="https://unpkg.com/maplibre-gl@^4.7.1/dist/maplibre-gl.js"></script>
+
 <!-- Primary Meta Tags -->
 <title>{title}</title>
 <meta name="title" content={title} />
