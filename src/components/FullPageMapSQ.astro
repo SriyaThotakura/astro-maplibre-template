@@ -75,14 +75,10 @@ const {
       <script>
         import maplibregl from "maplibre-gl";
         import { loadMapLayers } from "@lib/utils";
-        import type {
-          GeoJSONFeatureLayer,
-          ImageLayer,
-          RasterLayer,
-          VectorTileLayer,
-        } from "@types";
 
         class MapLibreFullPageMap extends HTMLElement {
+          cleanup?: () => void;
+
           connectedCallback() {
             const map = new maplibregl.Map({
               container: this.dataset.container || "maplibre-map",
@@ -117,16 +113,16 @@ const {
                 
                 if (legendContainer) {
                   const legendItems = layers.filter(
-                    (layer) => layer.legend && layer.legend.items && layer.legend.items.length > 0
+                    (layer: any) => layer.legend && layer.legend.items && layer.legend.items.length > 0
                   );
 
                   if (legendItems.length > 0) {
                     legendContainer.style.display = 'block';
-                    legendContainer.innerHTML = legendItems.map(layer => `
+                    legendContainer.innerHTML = legendItems.map((layer: any) => `
                       <div class="legend-item">
                         ${layer.legend.title ? `<h3>${layer.legend.title}</h3>` : ''}
                         <div class="legend-items">
-                          ${layer.legend.items.map(item => `
+                          ${layer.legend.items.map((item: any) => `
                             <div class="legend-row">
                               <span 
                                 class="legend-color" 
