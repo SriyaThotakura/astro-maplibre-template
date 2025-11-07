@@ -6,7 +6,7 @@
   layer-type: 'line'
   url: 'http://localhost:4321/astro-maplibre-template'
   paint:
-    fill-color: "#0000ff"
+    fill-color: "#00ffff"
     line-color: '#000000'
     line-width: 3
 
